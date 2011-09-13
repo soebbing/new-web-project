@@ -1,0 +1,9 @@
+A starting point for new projects, all set up with small pieces of example code.
+
+Used technologies:
+* Maven
+* Spring 3
+* Hibernate with MySQL
+* HTML5 Boilerplate
+* Google Closure
+* Scripts for compression of CSS & JS
