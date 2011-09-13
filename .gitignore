@@ -1,6 +1,7 @@
 out
 .orig
 build.xml
+target/*
 build/*
 tmp/*
 precompiled/*

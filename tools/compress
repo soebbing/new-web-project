@@ -4,22 +4,32 @@ CSS_DIR="../src/main/webapp/css"
 JS_DIR="../src/main/webapp/js"
 
 echo -n "Compressing CSS..."
-cat $CSS_DIR/libs/button.css >> ./styles-tmp.css
-cat $CSS_DIR/libs/custombuttons.css >> ./styles-tmp.css
-cat $CSS_DIR/libs/flatbutton.css >> ./styles-tmp.css
-cat $CSS_DIR/libs/common.css >> ./styles-tmp.css
-cat $CSS_DIR/libs/screen.css >> ./styles-tmp.css
+
+# Normalization
+cat $CSS_DIR/lib/normalize_before.css >> ./styles-tmp.css
+
+# Google Closure Styles
+cat $CSS_DIR/lib/button.css >> ./styles-tmp.css
+cat $CSS_DIR/lib/custombuttons.css >> ./styles-tmp.css
+cat $CSS_DIR/lib/flatbutton.css >> ./styles-tmp.css
+cat $CSS_DIR/lib/common.css >> ./styles-tmp.css
+
+# Your Own styles
+cat $CSS_DIR/lib/screen.css >> ./styles-tmp.css
+
+# Semantics
+cat $CSS_DIR/lib/semantics_after.css >> ./styles-tmp.css
+
 java -jar yuicompressor-2.4.2.jar --type css ./styles-tmp.css -o $CSS_DIR/$PROJECT.css
 echo "done!"
 
 echo -n "Aggregating JS..."
-$JS_DIR/libs/closure/closure/bin/calcdeps.py \
+$JS_DIR/lib/closure/closure/bin/calcdeps.py \
 -c closure.jar \
 -o script \
--i $JS_DIR/libs/mainpanel.js \
+-i $JS_DIR/lib/$PROJECT/mainpanel.js \
 --output_file=aggregated-tmp.js \
--p js/ \
--p $JS_DIR/libs/closure/closure/ #> /dev/null 2>&1
+-p $JS_DIR/lib/closure/closure/ #> /dev/null 2>&1
 echo "done!"
 
 echo -n "Compressing JS..."
@@ -29,5 +39,6 @@ java -jar closure.jar \
 --compilation_level ADVANCED_OPTIMIZATIONS #> /dev/null 2>&1
 echo "done!"
 
-tr -d '\r\n' < compiled-tmp.js > $JS_DIR/$PROJECT.js rm *tmp.js
+tr -d '\r\n' < compiled-tmp.js > $JS_DIR/$PROJECT.js
+rm *tmp.js
 rm *tmp.css
