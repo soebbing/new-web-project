@@ -4,10 +4,17 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+<<<<<<< HEAD
          id="com.youtuberadio">
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>WEB-INF\applicationContext.xml</param-value>
+=======
+         id="com.your_new_project">
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>WEB-INF/applicationContext.xml</param-value>
+>>>>>>> master
     </context-param>
 
     <listener>
