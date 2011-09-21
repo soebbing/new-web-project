@@ -8,10 +8,11 @@ precompiled/*
 modules/*
 lib/*
 catalog.xml
-public/stylesheets/cs.css
-public/javascripts/cs.js
-public/javascripts/deps.js
-public/javascripts/lib/closure
+src/main/webapp/css/your_new_project.css
+src/main/webapp/css/lib
+src/main/webapp/js/your_new_project.js
+src/main/webapp/js/deps.js
+src/main/webapp/js/lib
 nbproject/*
 dist/*
 .DS_Store
