@@ -20,12 +20,15 @@ cat $CSS_DIR/lib/screen.css >> ./styles-tmp.css
 # Semantics
 cat $CSS_DIR/lib/semantics_after.css >> ./styles-tmp.css
 
-java -jar yuicompressor-2.4.2.jar --type css ./styles-tmp.css -o $CSS_DIR/$PROJECT.css
+# Interpret LESS (requires node & LESS npm)
+bin/less ./styles-tmp.css > ./styles-tmp.css
+
+java -jar bin/yuicompressor-2.4.2.jar --type css ./styles-tmp.css -o $CSS_DIR/$PROJECT.css
 echo "done!"
 
 echo -n "Aggregating JS..."
 $JS_DIR/lib/closure/closure/bin/calcdeps.py \
--c closure.jar \
+-c bin/closure.jar \
 -o script \
 -i $JS_DIR/lib/$PROJECT/mainpanel.js \
 --output_file=aggregated-tmp.js \
@@ -33,7 +36,7 @@ $JS_DIR/lib/closure/closure/bin/calcdeps.py \
 echo "done!"
 
 echo -n "Compressing JS..."
-java -jar closure.jar \
+java -jar bin/closure.jar \
 --js aggregated-tmp.js \
 --js_output_file compiled-tmp.js \
 --compilation_level ADVANCED_OPTIMIZATIONS #> /dev/null 2>&1

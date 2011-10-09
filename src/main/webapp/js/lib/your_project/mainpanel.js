@@ -22,6 +22,7 @@ goog.inherits(your.MainPanel, goog.events.EventTarget);
 
 /* Erzeugt die Eventhandler */
 your.MainPanel.prototype.init = function() {
+    this.element_innerHTML = 'Closure working!';
 };
 
 goog.exportSymbol('your.MainPanel', your.MainPanel);

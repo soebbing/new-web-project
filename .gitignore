@@ -7,6 +7,7 @@ tmp/*
 precompiled/*
 modules/*
 lib/*
+tools/node_modules/*
 catalog.xml
 src/main/webapp/css/your_new_project.css
 src/main/webapp/css/lib

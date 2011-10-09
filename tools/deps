@@ -1,13 +1,14 @@
 #!/bin/bash
-export TARGET=../src/main/webapp
-export HOME=`pwd`
+PROJECT="your_project"
+TARGET=../src/main/webapp
+HOME=`pwd`
 
 cd $TARGET
 
-resources/js/lib/closure/closure/bin/calcdeps.py \
+js/lib/closure/closure/bin/calcdeps.py \
 -c ../../../tools/closure.jar \
--d resources/js/lib/closure/closure/ \
--p resources/js/lib/radio/ \
--o deps > resources/js/lib/deps.js
+-d js/lib/closure/closure/ \
+-p js/lib/$PROJECT/ \
+-o deps > js/lib/deps.js
 
 cd $HOME
