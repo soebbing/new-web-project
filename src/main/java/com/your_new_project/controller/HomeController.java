@@ -21,7 +21,7 @@ public class HomeController {
     private IUserService userService;
 
     /**
-     * Controller zur Darstellung des Players.
+     * Controller zur Darstellung der Daten eines Users.
      *
      * @param request
      * @param response
@@ -35,14 +35,14 @@ public class HomeController {
     }
 
     /**
-     * Example of Jackson JSON Marshalling.
+     * Beispiel eines Jackson JSON Marshallings.
      * 
-     * @param token
+     * @param someid
      * @param request
      * @return
      */
     @RequestMapping(value="/users", method = RequestMethod.GET)
-    public @ResponseBody User[] interprets(@RequestParam("token") String token, HttpServletRequest request) {
+    public @ResponseBody User[] users(@RequestParam("someid") String someid, HttpServletRequest request) {
         ArrayList<User> users = (ArrayList<User>) userService.findAllUsers();
         return users.toArray(new User[users.size()]);
     }
