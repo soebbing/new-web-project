@@ -4,44 +4,29 @@ CSS_DIR="../src/main/webapp/css"
 JS_DIR="../src/main/webapp/js"
 
 echo -n "Compressing CSS..."
-
-# Normalization
-cat $CSS_DIR/lib/normalize_before.css >> ./styles-tmp.css
-
-# Google Closure Styles
-cat $CSS_DIR/lib/button.css >> ./styles-tmp.css
-cat $CSS_DIR/lib/custombuttons.css >> ./styles-tmp.css
-cat $CSS_DIR/lib/flatbutton.css >> ./styles-tmp.css
-cat $CSS_DIR/lib/common.css >> ./styles-tmp.css
-
-# Your Own styles
-cat $CSS_DIR/lib/screen.css >> ./styles-tmp.css
-
-# Semantics
-cat $CSS_DIR/lib/semantics_after.css >> ./styles-tmp.css
-
-# Interpret LESS (requires node & LESS npm)
-bin/less ./styles-tmp.css > ./styles-tmp.css
-
-java -jar bin/closure-stylesheets.jar ./styles-tmp.css > $CSS_DIR/$PROJECT.css
+java -jar bin/closure-stylesheets.jar $CSS_DIR/lib/normalize_before.css $CSS_DIR/lib/button.css $CSS_DIR/lib/custombuttons.css $CSS_DIR/lib/dialog.css $CSS_DIR/lib/flatbutton.css $CSS_DIR/lib/common.css $CSS_DIR/lib/screen.css $CSS_DIR/lib/semantics_after.css > $CSS_DIR/$PROJECT.css
 echo "done!"
 
 echo -n "Aggregating JS..."
 $JS_DIR/lib/closure/closure/bin/calcdeps.py \
 -c bin/closure.jar \
 -o script \
--i $JS_DIR/lib/$PROJECT/mainpanel.js \
+--input=$JS_DIR/lib/$PROJECT/ \
 --output_file=aggregated-tmp.js \
--p $JS_DIR/lib/closure/closure/ #> /dev/null 2>&1
+--dep=$JS_DIR/lib/closure/closure/goog/ \
+--path=$JS_DIR \
+--path=$JS_DIR/lib/closure/closure/ > /dev/null
 echo "done!"
 
+# --externs=$JS_DIR/lib/$PROJECT/externs.js \  IF YOU NEED EXTERNS, UNCOMMENT THIS AND PUT IN PARAMETER LIST BELOW
 echo -n "Compressing JS..."
 java -jar bin/closure.jar \
+--process_closure_primitives \
+--jscomp_off checkTypes --jscomp_off checkVars --jscomp_off fileoverviewTags --jscomp_off invalidCasts \
 --js aggregated-tmp.js \
 --js_output_file compiled-tmp.js \
---compilation_level ADVANCED_OPTIMIZATIONS #> /dev/null 2>&1
+--compilation_level ADVANCED_OPTIMIZATIONS > /dev/null
 echo "done!"
 
 tr -d '\r\n' < compiled-tmp.js > $JS_DIR/$PROJECT.js
 rm *tmp.js
-rm *tmp.css
