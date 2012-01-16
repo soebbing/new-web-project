@@ -6,7 +6,7 @@ goog.require('goog.events');
 goog.require('goog.events.EventTarget');
 
 /**
- *  Erzeugt die nötigen Komponenten für die Applikation und sorgt für die Interaktion dazwischen
+ *  Responsible for creating all JavaScript elements and the interaction between those.
  *
  *  @constructor
  */
@@ -20,7 +20,7 @@ your.MainPanel = function() {
 };
 goog.inherits(your.MainPanel, goog.events.EventTarget);
 
-/* Erzeugt die Eventhandler */
+/* Creates DOM and attaches event handlers. */
 your.MainPanel.prototype.init = function() {
     this.element_innerHTML = 'Closure working!';
 };

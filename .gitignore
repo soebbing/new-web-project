@@ -10,10 +10,8 @@ lib/*
 tools/node_modules/*
 catalog.xml
 src/main/webapp/css/your_new_project.css
-src/main/webapp/css/lib
 src/main/webapp/js/your_new_project.js
 src/main/webapp/js/deps.js
-src/main/webapp/js/lib
 nbproject/*
 dist/*
 .DS_Store
