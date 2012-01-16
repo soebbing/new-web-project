@@ -409,7 +409,7 @@
     disk cache, which in this configuration will go to wherever java.io.tmp is
     defined on your system. On a standard Linux system this will be /tmp"
     -->
-    <cache name="usercache"
+    <cache name="your_cache"
            maxElementsInMemory="50000"
            eternal="false"
            overflowToDisk="true"
