@@ -3,30 +3,82 @@ PROJECT="your_project"
 CSS_DIR="../src/main/webapp/css"
 JS_DIR="../src/main/webapp/js"
 
+# ADVANCED CSS compression by class name shortening. Needs backend support (optional)
+#
+# If you use this, comment out the following block.
+#
+# To prevent a class from being shortend, add the following parameter:
+# --excluded-classes-from-renaming my-class-name
+#
+: <<'END'
 echo -n "Compressing CSS..."
-java -jar bin/closure-stylesheets.jar $CSS_DIR/lib/normalize_before.css $CSS_DIR/lib/button.css $CSS_DIR/lib/custombuttons.css $CSS_DIR/lib/dialog.css $CSS_DIR/lib/flatbutton.css $CSS_DIR/lib/common.css $CSS_DIR/lib/screen.css $CSS_DIR/lib/semantics_after.css > $CSS_DIR/$PROJECT.css
+# Shortening to properties for backend
+java -jar closure-stylesheets.jar \
+--rename CLOSURE \
+--output-renaming-map ../src/main/webapp/WEB-INF/classes/cssClasses.properties \
+--output-renaming-map-format PROPERTIES \
+--allow-unrecognized-functions \
+$CSS_DIR/lib/normalize_before.css \
+$CSS_DIR/lib/button.css \
+$CSS_DIR/lib/custombuttons.css \
+$CSS_DIR/lib/flatbutton.css \
+$CSS_DIR/lib/dialog.css \
+$CSS_DIR/lib/common.css \
+$CSS_DIR/lib/bootstrap.css \
+$CSS_DIR/lib/screen.css \
+$CSS_DIR/lib/semantics_after.css > $CSS_DIR/compiled.css
+
+# Shortening to renaming map for Closure Compilations
+java -jar closure-stylesheets.jar \
+--rename CLOSURE \
+--output-renaming-map renaming_map.js \
+--output-renaming-map-format CLOSURE_COMPILED \
+ --allow-unrecognized-functions \
+$CSS_DIR/lib/normalize_before.css \
+$CSS_DIR/lib/button.css \
+$CSS_DIR/lib/custombuttons.css \
+$CSS_DIR/lib/flatbutton.css \
+$CSS_DIR/lib/dialog.css \
+$CSS_DIR/lib/common.css \
+$CSS_DIR/lib/bootstrap.css \
+$CSS_DIR/lib/screen.css \
+$CSS_DIR/lib/semantics_after.css > /dev/null
+echo "done!"
+END
+
+echo -n "Compressing CSS..."
+java -jar bin/closure-stylesheets.jar \
+--allow-unrecognized-functions \
+$CSS_DIR/lib/normalize_before.css \
+$CSS_DIR/lib/button.css \
+$CSS_DIR/lib/custombuttons.css \
+$CSS_DIR/lib/flatbutton.css \
+$CSS_DIR/lib/dialog.css \
+$CSS_DIR/lib/common.css \
+$CSS_DIR/lib/bootstrap.css \
+$CSS_DIR/lib/screen.css \
+$CSS_DIR/lib/semantics_after.css > $CSS_DIR/compiled.css
 echo "done!"
 
-echo -n "Aggregating JS..."
+echo -n "Compressing JS..."
+# -f --externs=$JS_DIR/lib/$PROJECT/externs.js \  # IF YOU NEED EXTERNS, UNCOMMENT THIS AND PUT IN PARAMETER LIST BELOW
+# --path=renaming_map.js \ # NECESSARY IF YOU'RE USING ADVANCED CSS COMPRESSION (CLASS RENAMING) ABOVE
 $JS_DIR/lib/closure/closure/bin/calcdeps.py \
 -c bin/closure.jar \
--o script \
+-o compiled \
 --input=$JS_DIR/lib/$PROJECT/ \
---output_file=aggregated-tmp.js \
 --dep=$JS_DIR/lib/closure/closure/goog/ \
 --path=$JS_DIR \
---path=$JS_DIR/lib/closure/closure/ > /dev/null
+--path=$JS_DIR/lib/closure/closure/ \
+-f --process_closure_primitives \
+-f --jscomp_off -f checkTypes \
+-f --jscomp_off -f checkVars \
+-f --jscomp_off -f fileoverviewTags \
+-f --jscomp_off -f invalidCasts \
+-f --compilation_level -f ADVANCED_OPTIMIZATIONS \
+-f --js_output_file -f compiled-tmp.js > /dev/null
 echo "done!"
 
-# --externs=$JS_DIR/lib/$PROJECT/externs.js \  IF YOU NEED EXTERNS, UNCOMMENT THIS AND PUT IN PARAMETER LIST BELOW
-echo -n "Compressing JS..."
-java -jar bin/closure.jar \
---process_closure_primitives \
---jscomp_off checkTypes --jscomp_off checkVars --jscomp_off fileoverviewTags --jscomp_off invalidCasts \
---js aggregated-tmp.js \
---js_output_file compiled-tmp.js \
---compilation_level ADVANCED_OPTIMIZATIONS > /dev/null
-echo "done!"
-
+# REMOVE LINE BREAKS
 tr -d '\r\n' < compiled-tmp.js > $JS_DIR/$PROJECT.js
 rm *tmp.js
