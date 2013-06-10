@@ -43,7 +43,7 @@ goog.require('goog.string');
 /**
  * @define {boolean} Whether to strip out asserts or to leave them in.
  */
-goog.asserts.ENABLE_ASSERTS = goog.DEBUG;
+goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
 
 
 
@@ -71,7 +71,7 @@ goog.asserts.AssertionError = function(messagePattern, messageArgs) {
 goog.inherits(goog.asserts.AssertionError, goog.debug.Error);
 
 
-/** @inheritDoc */
+/** @override */
 goog.asserts.AssertionError.prototype.name = 'AssertionError';
 
 
@@ -261,17 +261,23 @@ goog.asserts.assertBoolean = function(value, opt_message, var_args) {
 /**
  * Checks if the value is an instance of the user-defined type if
  * goog.asserts.ENABLE_ASSERTS is true.
+ *
+ * The compiler may tighten the type returned by this function.
+ *
  * @param {*} value The value to check.
- * @param {!Function} type A user-defined constructor.
+ * @param {function(new: T, ...)} type A user-defined constructor.
  * @param {string=} opt_message Error message in case of failure.
  * @param {...*} var_args The items to substitute into the failure message.
  * @throws {goog.asserts.AssertionError} When the value is not an instance of
  *     type.
+ * @return {!T}
+ * @template T
  */
 goog.asserts.assertInstanceof = function(value, type, opt_message, var_args) {
   if (goog.asserts.ENABLE_ASSERTS && !(value instanceof type)) {
     goog.asserts.doAssertFailure_('instanceof check failed.', null,
         opt_message, Array.prototype.slice.call(arguments, 3));
   }
+  return value;
 };
 

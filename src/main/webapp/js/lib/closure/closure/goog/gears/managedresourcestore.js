@@ -55,6 +55,8 @@ goog.require('goog.string');
  */
 goog.gears.ManagedResourceStore = function(name, requiredCookie,
     opt_localServer) {
+  goog.base(this);
+
   this.localServer_ = opt_localServer ||
                       goog.gears.getFactory().create('beta.localserver', '1.0');
 
@@ -502,7 +504,7 @@ goog.gears.ManagedResourceStore.prototype.handleError_ = function(error) {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.gears.ManagedResourceStore.prototype.disposeInternal = function() {
   goog.gears.ManagedResourceStore.superClass_.disposeInternal.call(this);
   if (this.supportsEvents_ && this.gearsStore_) {

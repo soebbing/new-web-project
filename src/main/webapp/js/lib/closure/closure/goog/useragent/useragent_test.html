@@ -72,7 +72,6 @@ function tearDown() {
  * @param {string=} opt_vendor Navigator vendor string.
  */
 function assertUserAgent(expectedAgents, uaString, opt_product, opt_vendor) {
-  //alert('mocking');
   var mockGlobal = {
     'navigator': {
       'userAgent': uaString,
@@ -190,6 +189,8 @@ function testGecko() {
       '1.8.0.6');
   assertGecko('Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8)' +
       'Gecko/20060321 Gecko/2.0a1', '1.8');
+  assertGecko('Mozilla/5.0 (X11; Linux i686; rv:6.0) Gecko/6.0 Firefox/6.0',
+      '6.0');
 }
 
 function testIe() {
@@ -220,6 +221,13 @@ function testIeDocumentModeOverride() {
   documentMode = 8;
   assertIe('Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/5.0',
           '8.0');
+}
+
+function testDocumentModeInStandardsMode() {
+  reinitializeUserAgent();
+  var expectedMode = goog.userAgent.IE ? parseInt(goog.userAgent.VERSION) :
+                                         undefined;
+  assertEquals(expectedMode, goog.userAgent.DOCUMENT_MODE);
 }
 
 function testOpera() {

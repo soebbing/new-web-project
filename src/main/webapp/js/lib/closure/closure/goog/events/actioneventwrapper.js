@@ -14,6 +14,7 @@
 
 /**
  * @fileoverview Action event wrapper implementation.
+ * @author eae@google.com (Emil A Eklund)
  */
 
 goog.provide('goog.events.actionEventWrapper');
@@ -53,7 +54,9 @@ goog.events.actionEventWrapper = new goog.events.ActionEventWrapper_();
  */
 goog.events.ActionEventWrapper_.EVENT_TYPES_ = [
   goog.events.EventType.CLICK,
-  goog.events.EventType.KEYPRESS
+  goog.userAgent.GECKO ?
+      goog.events.EventType.KEYPRESS :
+      goog.events.EventType.KEYDOWN
 ];
 
 
@@ -62,8 +65,7 @@ goog.events.ActionEventWrapper_.EVENT_TYPES_ = [
  * implemented {@link goog.events.EventTarget}. A listener can only be added
  * once to an object.
  *
- * @param {EventTarget|goog.events.EventTarget} target The node to listen to
- *     events on.
+ * @param {goog.events.ListenableType} target The target to listen to events on.
  * @param {Function|Object} listener Callback method, or an object with a
  *     handleEvent function.
  * @param {boolean=} opt_capt Whether to fire in capture phase (defaults to
@@ -71,15 +73,17 @@ goog.events.ActionEventWrapper_.EVENT_TYPES_ = [
  * @param {Object=} opt_scope Element in whose scope to call the listener.
  * @param {goog.events.EventHandler=} opt_eventHandler Event handler to add
  *     listener to.
+ * @override
  */
 goog.events.ActionEventWrapper_.prototype.listen = function(target, listener,
     opt_capt, opt_scope, opt_eventHandler) {
   var callback = function(e) {
-    if (e.type == goog.events.EventType.CLICK &&
-        e.isMouseActionButton() ||
-        e.type == goog.events.EventType.KEYPRESS && (
-            e.keyCode == goog.events.KeyCodes.ENTER ||
-            e.keyCode == goog.events.KeyCodes.MAC_ENTER)) {
+    if (e.type == goog.events.EventType.CLICK && e.isMouseActionButton()) {
+      listener.call(opt_scope, e);
+    } else if (e.keyCode == goog.events.KeyCodes.ENTER ||
+        e.keyCode == goog.events.KeyCodes.MAC_ENTER) {
+      // convert keydown to keypress for backward compatibility.
+      e.type = goog.events.EventType.KEYPRESS;
       listener.call(opt_scope, e);
     }
   };
@@ -89,11 +93,11 @@ goog.events.ActionEventWrapper_.prototype.listen = function(target, listener,
   if (opt_eventHandler) {
     opt_eventHandler.listen(target,
         goog.events.ActionEventWrapper_.EVENT_TYPES_,
-        callback);
+        callback, opt_capt);
   } else {
     goog.events.listen(target,
         goog.events.ActionEventWrapper_.EVENT_TYPES_,
-        callback);
+        callback, opt_capt);
   }
 };
 
@@ -101,8 +105,7 @@ goog.events.ActionEventWrapper_.prototype.listen = function(target, listener,
 /**
  * Removes an event listener added using goog.events.EventWrapper.listen.
  *
- * @param {EventTarget|goog.events.EventTarget} target The node to remove
- *    listener from.
+ * @param {goog.events.ListenableType} target The node to remove listener from.
  * @param {Function|Object} listener Callback method, or an object with a
  *     handleEvent function.
  * @param {boolean=} opt_capt Whether to fire in capture phase (defaults to
@@ -110,19 +113,21 @@ goog.events.ActionEventWrapper_.prototype.listen = function(target, listener,
  * @param {Object=} opt_scope Element in whose scope to call the listener.
  * @param {goog.events.EventHandler=} opt_eventHandler Event handler to remove
  *     listener from.
+ * @override
  */
 goog.events.ActionEventWrapper_.prototype.unlisten = function(target, listener,
     opt_capt, opt_scope, opt_eventHandler) {
   for (var type, j = 0; type = goog.events.ActionEventWrapper_.EVENT_TYPES_[j];
       j++) {
-    var listeners = goog.events.getListeners(target, type, false);
+    var listeners = goog.events.getListeners(target, type, !!opt_capt);
     for (var obj, i = 0; obj = listeners[i]; i++) {
       if (obj.listener.listener_ == listener &&
           obj.listener.scope_ == opt_scope) {
         if (opt_eventHandler) {
-          opt_eventHandler.unlisten(target, type, obj.listener);
+          opt_eventHandler.unlisten(target, type, obj.listener, opt_capt,
+              opt_scope);
         } else {
-          goog.events.unlisten(target, type, obj.listener);
+          goog.events.unlisten(target, type, obj.listener, opt_capt, opt_scope);
         }
         break;
       }

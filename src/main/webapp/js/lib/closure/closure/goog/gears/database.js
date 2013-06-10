@@ -367,7 +367,8 @@ goog.gears.Database.prototype.executeVarArgs_ = function(sql, params,
     if (goog.isArray(params[startIndex])) {
       return this.execute(sql, params[startIndex]);
     }
-    var args = Array.prototype.slice.call(params, startIndex);
+    var args = Array.prototype.slice.call(
+        /** @type {{length:number}} */ (params), startIndex);
     return this.execute(sql, args);
   }
 };
@@ -903,7 +904,7 @@ goog.gears.Database.prototype.close = function() {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.gears.Database.prototype.disposeInternal = function() {
   goog.gears.Database.superClass_.disposeInternal.call(this);
   this.database_ = null;

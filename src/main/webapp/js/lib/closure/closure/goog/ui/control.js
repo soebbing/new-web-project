@@ -16,8 +16,9 @@
  * @fileoverview Base class for UI controls such as buttons, menus, menu items,
  * toolbar buttons, etc.  The implementation is based on a generalized version
  * of {@link goog.ui.MenuItem}.
- * TODO(user):  If the renderer framework works well, pull it into Component.
+ * TODO(attila):  If the renderer framework works well, pull it into Component.
  *
+ * @author attila@google.com (Attila Bodis)
  * @see ../demos/control.html
  * @see http://code.google.com/p/closure-library/wiki/IntroToControls
  */
@@ -26,17 +27,13 @@ goog.provide('goog.ui.Control');
 
 goog.require('goog.array');
 goog.require('goog.dom');
-goog.require('goog.events.BrowserEvent.MouseButton');
+goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.events.KeyHandler');
-goog.require('goog.events.KeyHandler.EventType');
 goog.require('goog.string');
 goog.require('goog.ui.Component');
-goog.require('goog.ui.Component.Error');
-goog.require('goog.ui.Component.EventType');
-goog.require('goog.ui.Component.State');
 goog.require('goog.ui.ControlContent');
 goog.require('goog.ui.ControlRenderer');
 goog.require('goog.ui.decorate');
@@ -85,7 +82,7 @@ goog.inherits(goog.ui.Control, goog.ui.Component);
 
 
 // Renderer registry.
-// TODO(user): Refactor existing usages inside Google in a follow-up CL.
+// TODO(attila): Refactor existing usages inside Google in a follow-up CL.
 
 
 /**
@@ -239,7 +236,7 @@ goog.ui.Control.prototype.allowTextSelection_ = false;
 
 /**
  * The control's preferred ARIA role.
- * @type {?goog.dom.a11y.Role}
+ * @type {?goog.a11y.aria.Role}
  * @private
  */
 goog.ui.Control.prototype.preferredAriaRole_ = null;
@@ -376,8 +373,8 @@ goog.ui.Control.prototype.addClassName = function(className) {
  *     element.
  */
 goog.ui.Control.prototype.removeClassName = function(className) {
-  if (className && this.extraClassNames_) {
-    goog.array.remove(this.extraClassNames_, className);
+  if (className && this.extraClassNames_ &&
+      goog.array.remove(this.extraClassNames_, className)) {
     if (this.extraClassNames_.length == 0) {
       this.extraClassNames_ = null;
     }
@@ -438,7 +435,7 @@ goog.ui.Control.prototype.createDom = function() {
  * cases where a different ARIA role is appropriate for a control because of the
  * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
  * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
- * @return {?goog.dom.a11y.Role} This control's preferred ARIA role or null if
+ * @return {?goog.a11y.aria.Role} This control's preferred ARIA role or null if
  *     no preferred ARIA role is set.
  */
 goog.ui.Control.prototype.getPreferredAriaRole = function() {
@@ -452,7 +449,7 @@ goog.ui.Control.prototype.getPreferredAriaRole = function() {
  * different ARIA role is appropriate for a control because of the
  * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
  * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
- * @param {goog.dom.a11y.Role} role This control's preferred ARIA role.
+ * @param {goog.a11y.aria.Role} role This control's preferred ARIA role.
  */
 goog.ui.Control.prototype.setPreferredAriaRole = function(role) {
   this.preferredAriaRole_ = role;
@@ -464,6 +461,7 @@ goog.ui.Control.prototype.setPreferredAriaRole = function(role) {
  * or null if the control itself hasn't been rendered yet.  Overrides
  * {@link goog.ui.Component#getContentElement} by delegating to the renderer.
  * @return {Element} Element to contain child elements (null if none).
+ * @override
  */
 goog.ui.Control.prototype.getContentElement = function() {
   // Delegate to renderer.
@@ -476,6 +474,7 @@ goog.ui.Control.prototype.getContentElement = function() {
  * Overrides {@link goog.ui.Component#canDecorate}.
  * @param {Element} element Element to decorate.
  * @return {boolean} Whether the element can be decorated by this component.
+ * @override
  */
 goog.ui.Control.prototype.canDecorate = function(element) {
   // Controls support pluggable renderers; delegate to the renderer.
@@ -567,6 +566,10 @@ goog.ui.Control.prototype.enableMouseEventHandling_ = function(enable) {
         listen(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown).
         listen(element, goog.events.EventType.MOUSEUP, this.handleMouseUp).
         listen(element, goog.events.EventType.MOUSEOUT, this.handleMouseOut);
+    if (this.handleContextMenu != goog.nullFunction) {
+      handler.listen(element, goog.events.EventType.CONTEXTMENU,
+          this.handleContextMenu);
+    }
     if (goog.userAgent.IE) {
       handler.listen(element, goog.events.EventType.DBLCLICK,
           this.handleDblClick);
@@ -579,6 +582,10 @@ goog.ui.Control.prototype.enableMouseEventHandling_ = function(enable) {
             this.handleMouseDown).
         unlisten(element, goog.events.EventType.MOUSEUP, this.handleMouseUp).
         unlisten(element, goog.events.EventType.MOUSEOUT, this.handleMouseOut);
+    if (this.handleContextMenu != goog.nullFunction) {
+      handler.unlisten(element, goog.events.EventType.CONTEXTMENU,
+          this.handleContextMenu);
+    }
     if (goog.userAgent.IE) {
       handler.unlisten(element, goog.events.EventType.DBLCLICK,
           this.handleDblClick);
@@ -605,7 +612,7 @@ goog.ui.Control.prototype.exitDocument = function() {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.Control.prototype.disposeInternal = function() {
   goog.ui.Control.superClass_.disposeInternal.call(this);
   if (this.keyHandler_) {
@@ -651,11 +658,12 @@ goog.ui.Control.prototype.setContent = function(content) {
 /**
  * Sets the component's content to the given text caption, element, or array
  * of nodes.  Unlike {@link #setContent}, doesn't modify the component's DOM.
- * Called by renderers during element decoration.  Considered protected; should
- * only be used within this package and by subclasses.
+ * Called by renderers during element decoration.
+ *
+ * This should only be used by subclasses and its associated renderers.
+ *
  * @param {goog.ui.ControlContent} content Text caption or DOM structure
  *     to set as the component's contents.
- * @protected
  */
 goog.ui.Control.prototype.setContentInternal = function(content) {
   this.content_ = content;
@@ -691,7 +699,7 @@ goog.ui.Control.prototype.setCaption = function(caption) {
 // Component state management.
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.Control.prototype.setRightToLeft = function(rightToLeft) {
   // The superclass implementation ensures the control isn't in the document.
   goog.ui.Control.superClass_.setRightToLeft.call(this, rightToLeft);
@@ -1003,8 +1011,10 @@ goog.ui.Control.prototype.setState = function(state, enable) {
  * update the component's styling, and doesn't reject unsupported states.
  * Called by renderers during element decoration.  Considered protected;
  * should only be used within this package and by subclasses.
+ *
+ * This should only be used by subclasses and its associated renderers.
+ *
  * @param {number} state Bit mask representing component state.
- * @protected
  */
 goog.ui.Control.prototype.setStateInternal = function(state) {
   this.state_ = state;
@@ -1170,6 +1180,13 @@ goog.ui.Control.prototype.handleMouseOut = function(e) {
 
 
 /**
+ * Handles contextmenu events.
+ * @param {goog.events.BrowserEvent} e Event to handle.
+ */
+goog.ui.Control.prototype.handleContextMenu = goog.nullFunction;
+
+
+/**
  * Checks if a mouse event (mouseover or mouseout) occured below an element.
  * @param {goog.events.BrowserEvent} e Mouse event (should be mouseover or
  *     mouseout).
@@ -1283,12 +1300,11 @@ goog.ui.Control.prototype.performActionInternal = function(e) {
   var actionEvent = new goog.events.Event(goog.ui.Component.EventType.ACTION,
       this);
   if (e) {
-    var properties = [
-      'altKey', 'ctrlKey', 'metaKey', 'shiftKey', 'platformModifierKey'
-    ];
-    for (var property, i = 0; property = properties[i]; i++) {
-      actionEvent[property] = e[property];
-    }
+    actionEvent.altKey = e.altKey;
+    actionEvent.ctrlKey = e.ctrlKey;
+    actionEvent.metaKey = e.metaKey;
+    actionEvent.shiftKey = e.shiftKey;
+    actionEvent.platformModifierKey = e.platformModifierKey;
   }
   return this.dispatchEvent(actionEvent);
 };

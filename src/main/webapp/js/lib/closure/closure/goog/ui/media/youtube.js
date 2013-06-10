@@ -70,13 +70,10 @@ goog.provide('goog.ui.media.Youtube');
 goog.provide('goog.ui.media.YoutubeModel');
 
 goog.require('goog.string');
-goog.require('goog.ui.Component.Error');
-goog.require('goog.ui.Component.State');
+goog.require('goog.ui.Component');
 goog.require('goog.ui.media.FlashObject');
 goog.require('goog.ui.media.Media');
 goog.require('goog.ui.media.MediaModel');
-goog.require('goog.ui.media.MediaModel.Player');
-goog.require('goog.ui.media.MediaModel.Thumbnail');
 goog.require('goog.ui.media.MediaRenderer');
 
 
@@ -151,11 +148,13 @@ goog.ui.media.Youtube.CSS_CLASS = goog.getCssName('goog-ui-media-youtube');
  * on the thumbnail), which means we have to embed the youtube flash video and
  * play it.
  *
- * @param {goog.ui.media.Media} control The media control.
+ * @param {goog.ui.Control} c The media control.
  * @param {goog.ui.Component.State} state The state to be set or cleared.
  * @param {boolean} enable Whether the state is enabled or disabled.
+ * @override
  */
-goog.ui.media.Youtube.prototype.setState = function(control, state, enable) {
+goog.ui.media.Youtube.prototype.setState = function(c, state, enable) {
+  var control = /** @type {goog.ui.media.Media} */ (c);
   goog.ui.media.Youtube.superClass_.setState.call(this, control, state, enable);
 
   // control.createDom has to be called before any state is set.
@@ -189,6 +188,7 @@ goog.ui.media.Youtube.prototype.setState = function(control, state, enable) {
  * rendered using this renderer.
  *
  * @return {string} Renderer-specific CSS class.
+ * @override
  */
 goog.ui.media.Youtube.prototype.getCssClass = function() {
   return goog.ui.media.Youtube.CSS_CLASS;

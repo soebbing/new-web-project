@@ -51,6 +51,7 @@ function testLock() {
 
   assertEquals(6, add(1, 2, 3));
   assertEquals(0, goog.functions.lock(add)(1, 2, 3));
+  assertEquals(3, goog.functions.lock(add, 2)(1, 2, 3));
   assertEquals(6, goog.partial(add, 1, 2)(3));
   assertEquals(3, goog.functions.lock(goog.partial(add, 1, 2))(3));
 }
@@ -73,11 +74,19 @@ function testConstant() {
   assertEquals(undefined, goog.functions.constant()());
 }
 
-function testThrow() {
+function testError() {
   var f = goog.functions.error('x');
   var e = assertThrows(
       'A function created by goog.functions.error must throw an error', f);
   assertEquals('x', e.message);
+}
+
+function testFail() {
+  var obj = {};
+  var f = goog.functions.fail(obj);
+  var e = assertThrows(
+      'A function created by goog.functions.raise must throw its input', f);
+  assertEquals(obj, e);
 }
 
 function testCompose() {

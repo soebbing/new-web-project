@@ -94,13 +94,13 @@ goog.ui.CookieEditor.prototype.selectCookie = function(cookieKey) {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.CookieEditor.prototype.canDecorate = function() {
   return false;
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.CookieEditor.prototype.createDom = function() {
   // Debug-only, so we don't need i18n.
   this.clearButtonElem_ = /** @type {HTMLButtonElement} */ (goog.dom.createDom(
@@ -125,7 +125,7 @@ goog.ui.CookieEditor.prototype.createDom = function() {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.CookieEditor.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
   this.getHandler().listen(this.clearButtonElem_,
@@ -164,15 +164,15 @@ goog.ui.CookieEditor.prototype.handleUpdate_ = function(e) {
     }
     if (goog.net.cookies.isValidValue(value)) {
       goog.net.cookies.set(this.cookieKey_, value);
-      goog.style.showElement(this.valueWarningElem_, false);
+      goog.style.setElementShown(this.valueWarningElem_, false);
     } else {
-      goog.style.showElement(this.valueWarningElem_, true);
+      goog.style.setElementShown(this.valueWarningElem_, true);
     }
   }
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.CookieEditor.prototype.disposeInternal = function() {
   this.clearButtonElem_ = null;
   this.cookieKey_ = null;

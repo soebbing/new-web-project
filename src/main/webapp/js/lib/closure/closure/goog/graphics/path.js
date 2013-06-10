@@ -15,6 +15,8 @@
 
 /**
  * @fileoverview Represents a path used with a Graphics implementation.
+ * @author arv@google.com (Erik Arvidsson)
+ * @author glenning@google.com (Anthony Glenning)
  */
 
 goog.provide('goog.graphics.Path');
@@ -34,6 +36,9 @@ goog.require('goog.math');
  * the {@code transform} method.
  *
  * @constructor
+ * @deprecated goog.graphics is deprecated. It existed to abstract over browser
+ *     differences before the canvas tag was widely supported.  See
+ *     http://en.wikipedia.org/wiki/Canvas_element for details.
  */
 goog.graphics.Path = function() {
   /**
@@ -101,6 +106,7 @@ goog.graphics.Path.Segment = {
  * The number of points for each segment type.
  * @type {!Array.<number>}
  * @private
+ * @suppress {deprecated} goog.graphics.Path is deprecated.
  */
 goog.graphics.Path.segmentArgCounts_ = (function() {
   var counts = [];
@@ -160,7 +166,7 @@ goog.graphics.Path.prototype.clear = function() {
 
 
 /**
- * Adds a point to the path by moving to the specified point. Repaeated moveTo
+ * Adds a point to the path by moving to the specified point. Repeated moveTo
  * commands are collapsed into a single moveTo.
  *
  * @param {number} x X coordinate of destination point.
@@ -428,6 +434,7 @@ goog.graphics.Path.prototype.isSimple = function() {
  * A map from segment type to the path function to call to simplify a path.
  * @type {!Object}
  * @private
+ * @suppress {deprecated} goog.graphics.Path is deprecated.
  */
 goog.graphics.Path.simplifySegmentMap_ = (function() {
   var map = {};
@@ -449,6 +456,7 @@ goog.graphics.Path.simplifySegmentMap_ = (function() {
  *
  * @param {!goog.graphics.Path} src The path to simplify.
  * @return {!goog.graphics.Path} A new simplified path.
+ * @suppress {deprecated} goog.graphics is deprecated.
  */
 goog.graphics.Path.createSimplifiedPath = function(src) {
   if (src.isSimple()) {

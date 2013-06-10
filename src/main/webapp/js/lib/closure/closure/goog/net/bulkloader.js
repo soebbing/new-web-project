@@ -21,7 +21,6 @@
 goog.provide('goog.net.BulkLoader');
 
 goog.require('goog.debug.Logger');
-goog.require('goog.events.Event');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
 goog.require('goog.net.BulkLoaderHelper');
@@ -66,11 +65,20 @@ goog.net.BulkLoader.prototype.logger_ =
 
 
 /**
- * Gets the response texts.
+ * Gets the response texts, in order.
  * @return {Array.<string>} The response texts.
  */
 goog.net.BulkLoader.prototype.getResponseTexts = function() {
   return this.helper_.getResponseTexts();
+};
+
+
+/**
+ * Gets the request Uris.
+ * @return {Array.<string>} The request URIs, in order.
+ */
+goog.net.BulkLoader.prototype.getRequestUris = function() {
+  return this.helper_.getUris();
 };
 
 
@@ -160,7 +168,7 @@ goog.net.BulkLoader.prototype.finishLoad_ = function() {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.net.BulkLoader.prototype.disposeInternal = function() {
   goog.net.BulkLoader.superClass_.disposeInternal.call(this);
 

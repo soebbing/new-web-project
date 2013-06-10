@@ -44,6 +44,7 @@ goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
+goog.require('goog.userAgent');
 
 
 
@@ -93,7 +94,7 @@ goog.events.PasteHandler = function(element) {
 
   if (goog.userAgent.WEBKIT ||
       goog.userAgent.IE ||
-      goog.userAgent.GECKO && goog.userAgent.isVersion('1.9')) {
+      goog.userAgent.GECKO && goog.userAgent.isVersionOrHigher('1.9')) {
     // Most modern browsers support the paste event.
     this.eventHandler_.listen(element, goog.events.EventType.PASTE,
         this.dispatch_);
@@ -207,7 +208,7 @@ goog.events.PasteHandler.prototype.logger_ =
     goog.debug.Logger.getLogger('goog.events.PasteHandler');
 
 
-/** @inheritDoc */
+/** @override */
 goog.events.PasteHandler.prototype.disposeInternal = function() {
   goog.events.PasteHandler.superClass_.disposeInternal.call(this);
   this.eventHandler_.dispose();
@@ -262,11 +263,7 @@ goog.events.PasteHandler.prototype.checkUpdatedText_ = function() {
 goog.events.PasteHandler.prototype.dispatch_ = function(e) {
   var event = new goog.events.BrowserEvent(e.getBrowserEvent());
   event.type = goog.events.PasteHandler.EventType.PASTE;
-  try {
-    this.dispatchEvent(event);
-  } finally {
-    event.dispose();
-  }
+  this.dispatchEvent(event);
 
   // Starts polling for updates in the element.value property so we can tell
   // when do dispatch the AFTER_PASTE event. (We do an initial check after an

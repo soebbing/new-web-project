@@ -32,6 +32,7 @@ goog.require('goog.editor.style');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventType');
+goog.require('goog.math.Box');
 goog.require('goog.positioning');
 goog.require('goog.string');
 goog.require('goog.style');
@@ -91,7 +92,7 @@ goog.ui.editor.Bubble = function(parent, zIndex) {
       this.dom_.createDom(goog.dom.TagName.DIV,
           {'className': goog.ui.editor.Bubble.BUBBLE_CLASSNAME});
 
-  goog.style.showElement(this.bubbleContainer_, false);
+  goog.style.setElementShown(this.bubbleContainer_, false);
   goog.dom.appendChild(parent, this.bubbleContainer_);
   goog.style.setStyle(this.bubbleContainer_, 'zIndex', zIndex);
 
@@ -158,7 +159,7 @@ goog.ui.editor.Bubble.prototype.logger =
     goog.debug.Logger.getLogger('goog.ui.editor.Bubble');
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.editor.Bubble.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
@@ -175,7 +176,6 @@ goog.ui.editor.Bubble.prototype.disposeInternal = function() {
 
 /**
  * @return {Element} The element that where the bubble's contents go.
- * @protected
  */
 goog.ui.editor.Bubble.prototype.getContentElement = function() {
   return this.bubbleContents_;

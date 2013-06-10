@@ -69,6 +69,7 @@ goog.structs.TreeNode.prototype.children_ = null;
 /**
  * @return {!goog.structs.TreeNode} Clone of the tree node without its parent
  *     and child nodes. The key and the value are copied by reference.
+ * @override
  */
 goog.structs.TreeNode.prototype.clone = function() {
   return new goog.structs.TreeNode(this.getKey(), this.getValue());
@@ -282,7 +283,7 @@ goog.structs.TreeNode.prototype.forEachChild = function(f, opt_this) {
 
 
 /**
- * Traverses all child nodes recursively.
+ * Traverses all child nodes recursively in preorder.
  * @param {function(!goog.structs.TreeNode)} f Callback function. It takes the
  *     node as argument.
  * @param {Object=} opt_this The object to be used as the value of {@code this}
@@ -293,6 +294,25 @@ goog.structs.TreeNode.prototype.forEachDescendant = function(f, opt_this) {
     f.call(opt_this, child);
     child.forEachDescendant(f, opt_this);
   });
+};
+
+
+/**
+ * Traverses the subtree with the possibility to skip branches. Starts with
+ * this node, and visits the descendant nodes depth-first, in preorder.
+ * @param {function(!goog.structs.TreeNode): (boolean|undefined)} f Callback
+ *     function. It takes the node as argument. The children of this node will
+ *     be visited if the callback returns true or undefined, and will be
+ *     skipped if the callback returns false.
+ * @param {Object=} opt_this The object to be used as the value of {@code this}
+ *     within {@code f}.
+ */
+goog.structs.TreeNode.prototype.traverse = function(f, opt_this) {
+  if (f.call(opt_this, this) !== false) {
+    goog.array.forEach(this.getChildren(), function(child) {
+      child.traverse(f, opt_this);
+    });
+  }
 };
 
 

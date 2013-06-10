@@ -26,11 +26,10 @@ goog.require('goog.json');
 goog.require('goog.net.ErrorCode');
 goog.require('goog.net.EventType');
 goog.require('goog.net.HttpStatus');
-goog.require('goog.net.XhrIo.ResponseType');
+goog.require('goog.net.XhrIo');
 goog.require('goog.net.XmlHttp');
 goog.require('goog.object');
 goog.require('goog.structs.Map');
-goog.require('goog.uri.utils');
 
 
 
@@ -63,9 +62,16 @@ goog.inherits(goog.testing.net.XhrIo, goog.events.EventTarget);
 
 
 /**
+ * Alias this enum here to make mocking of goog.net.XhrIo easier.
+ * @enum {string}
+ */
+goog.testing.net.XhrIo.ResponseType = goog.net.XhrIo.ResponseType;
+
+
+/**
  * All non-disposed instances of goog.testing.net.XhrIo created
  * by {@link goog.testing.net.XhrIo.send} are in this Array.
- * @see goog.testing.net.XhrIo.cleanupAllPendingStaticSends
+ * @see goog.testing.net.XhrIo.cleanup
  * @type {Array.<goog.testing.net.XhrIo>}
  * @private
  */
@@ -79,6 +85,19 @@ goog.testing.net.XhrIo.sendInstances_ = [];
  */
 goog.testing.net.XhrIo.getSendInstances = function() {
   return goog.testing.net.XhrIo.sendInstances_;
+};
+
+
+/**
+ * Disposes all non-disposed instances of goog.testing.net.XhrIo created by
+ * {@link goog.testing.net.XhrIo.send}.
+ * @see goog.net.XhrIo.cleanup
+ */
+goog.testing.net.XhrIo.cleanup = function() {
+  var instances = goog.testing.net.XhrIo.sendInstances_;
+  while (instances.length) {
+    instances.pop().dispose();
+  }
 };
 
 
@@ -152,11 +171,19 @@ goog.testing.net.XhrIo.prototype.lastUri_ = '';
 
 
 /**
+ * Last HTTP method that was requested.
+ * @type {string|undefined}
+ * @private
+ */
+goog.testing.net.XhrIo.prototype.lastMethod_;
+
+
+/**
  * Last POST content that was requested.
  * @type {string|undefined}
  * @private
  */
-goog.testing.net.XhrIo.prototype.lastContent_ = undefined;
+goog.testing.net.XhrIo.prototype.lastContent_;
 
 
 /**
@@ -164,7 +191,7 @@ goog.testing.net.XhrIo.prototype.lastContent_ = undefined;
  * @type {Object|goog.structs.Map|undefined}
  * @private
  */
-goog.testing.net.XhrIo.prototype.lastHeaders_ = undefined;
+goog.testing.net.XhrIo.prototype.lastHeaders_;
 
 
 /**
@@ -362,6 +389,7 @@ goog.testing.net.XhrIo.prototype.send = function(url, opt_method, opt_content,
   }
 
   this.lastUri_ = url;
+  this.lastMethod_ = opt_method || 'GET';
   this.lastContent_ = opt_content;
   this.lastHeaders_ = opt_headers;
 
@@ -395,6 +423,13 @@ goog.testing.net.XhrIo.prototype.simulateReadyStateChange =
     throw Error('Readystate cannot go backwards');
   }
 
+  // INTERACTIVE can be dispatched repeatedly as more data is reported.
+  if (readyState == goog.net.XmlHttp.ReadyState.INTERACTIVE &&
+      readyState == this.readyState_) {
+    this.dispatchEvent(goog.net.EventType.READY_STATE_CHANGE);
+    return;
+  }
+
   while (this.readyState_ < readyState) {
     this.readyState_++;
     this.dispatchEvent(goog.net.EventType.READY_STATE_CHANGE);
@@ -404,6 +439,21 @@ goog.testing.net.XhrIo.prototype.simulateReadyStateChange =
       this.dispatchEvent(goog.net.EventType.COMPLETE);
     }
   }
+};
+
+
+/**
+ * Simulate receiving some bytes but the request not fully completing, and
+ * the XHR entering the 'INTERACTIVE' state.
+ * @param {string} partialResponse A string to append to the response text.
+ * @param {Object=} opt_headers Simulated response headers.
+ */
+goog.testing.net.XhrIo.prototype.simulatePartialResponse =
+    function(partialResponse, opt_headers) {
+  this.response_ += partialResponse;
+  this.responseHeaders_ = opt_headers || {};
+  this.statusCode_ = 200;
+  this.simulateReadyStateChange(goog.net.XmlHttp.ReadyState.INTERACTIVE);
 };
 
 
@@ -536,6 +586,15 @@ goog.testing.net.XhrIo.prototype.getLastUri = function() {
 
 
 /**
+ * Gets the last HTTP method that was requested.
+ * @return {string|undefined} Last HTTP method used by send.
+ */
+goog.testing.net.XhrIo.prototype.getLastMethod = function() {
+  return this.lastMethod_;
+};
+
+
+/**
  * Gets the last POST content that was requested.
  * @return {string|undefined} Last POST content or undefined if last request was
  *      a GET.
@@ -563,6 +622,16 @@ goog.testing.net.XhrIo.prototype.getLastRequestHeaders = function() {
 goog.testing.net.XhrIo.prototype.getResponseText = function() {
   return goog.isString(this.response_) ? this.response_ :
          goog.dom.xml.serialize(this.response_);
+};
+
+
+/**
+ * Gets the response body from the Xhr object. Will only return correct result
+ * when called from the context of a callback.
+ * @return {Object} Binary result from the server or null.
+ */
+goog.testing.net.XhrIo.prototype.getResponseBody = function() {
+  return null;
 };
 
 

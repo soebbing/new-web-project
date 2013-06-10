@@ -117,7 +117,7 @@ goog.events.FileDropHandler.EventType = {
 };
 
 
-/** @inheritDoc */
+/** @override */
 goog.events.FileDropHandler.prototype.disposeInternal = function() {
   goog.events.FileDropHandler.superClass_.disposeInternal.call(this);
   this.eventHandler_.dispose();
@@ -133,11 +133,7 @@ goog.events.FileDropHandler.prototype.dispatch_ = function(e) {
   this.logger_.fine('Firing DROP event...');
   var event = new goog.events.BrowserEvent(e.getBrowserEvent());
   event.type = goog.events.FileDropHandler.EventType.DROP;
-  try {
-    this.dispatchEvent(event);
-  } finally {
-    event.dispose();
-  }
+  this.dispatchEvent(event);
 };
 
 

@@ -22,7 +22,6 @@ goog.provide('goog.ui.MenuBase');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyHandler');
-goog.require('goog.events.KeyHandler.EventType');
 goog.require('goog.ui.Popup');
 
 
@@ -68,7 +67,7 @@ goog.ui.MenuBase.Events = {};
 goog.ui.MenuBase.Events.ITEM_ACTION = 'itemaction';
 
 
-/** @inheritDoc */
+/** @override */
 goog.ui.MenuBase.prototype.disposeInternal = function() {
   goog.ui.MenuBase.superClass_.disposeInternal.call(this);
   this.eventHandler_.dispose();
@@ -135,7 +134,7 @@ goog.ui.MenuBase.prototype.getSelectedItem = function() {
  * Sets the selected item
  *
  * @param {Object} item The item to select. The type of this item is specific
- * to the menu class.
+ *     to the menu class.
  */
 goog.ui.MenuBase.prototype.setSelectedItem = function(item) {
 };
@@ -164,7 +163,7 @@ goog.ui.MenuBase.prototype.onMouseOut = function(e) {
 /**
  * Mouse down handler for the menu. Derived classes should override.
  *
- * @param {goog.events.Event} e The event object.
+ * @param {!goog.events.Event} e The event object.
  * @protected
  */
 goog.ui.MenuBase.prototype.onMouseDown = function(e) {

@@ -24,7 +24,15 @@ goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.json');
+goog.require('goog.net.xpc.CfgFields');
 goog.require('goog.net.xpc.CrossPageChannel');
+
+
+/**
+ * Namespace for the demo. We don't use goog.provide here because it's not a
+ * real module (cannot be required).
+ */
+var xpcdemo = {};
 
 
 /**
@@ -41,13 +49,6 @@ goog.global.initOuter = function() {
 goog.global.initInner = function() {
   goog.events.listen(window, 'load', function() { xpcdemo.initInner(); });
 };
-
-
-/**
- * Namespace for the demo. We don't use goog.provide here because it's not a
- * real module (cannot be required).
- */
-xpcdemo = {};
 
 
 /**
@@ -194,6 +195,7 @@ xpcdemo.ping = function() {
   xpcdemo.channel.send('ping', goog.now() + '');
 };
 
+
 /**
  * The handler function for incoming pings (messages sent to the service
  * called 'ping');
@@ -258,7 +260,7 @@ xpcdemo.stopMousemoveForwarding = function() {
  */
 xpcdemo.mouseEventHandler_ = function(e) {
   xpcdemo.channel.send('events',
-                   [e.type, e.clientX, e.clientY, goog.now()].join(','));
+      [e.type, e.clientX, e.clientY, goog.now()].join(','));
 };
 
 
